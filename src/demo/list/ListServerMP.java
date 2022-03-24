@@ -272,387 +272,390 @@ public final class ListServerMP implements SingleExecutable {
 
                 @Override
                 public boolean isDependent(MessageContextPair r1, MessageContextPair r2) {
+                    for(int i = 0; i < r1.request.size() ; i++){
+                        for(int j = 0; i < r2.request.size() ; j++){
+                            
+                            switch (r1.opId.get(i)) {
+                                case MultipartitionMapping.GR:
+                                    if (conflictR1(r2.opId.get(j))
+                                            || conflictR2(r2.opId.get(j))
+                                            || conflictR3(r2.opId.get(j))
+                                            || conflictR4(r2.opId.get(j))
+                                            || conflictR5(r2.opId.get(j))
+                                            || conflictR6(r2.opId.get(j))
+                                            || conflictR7(r2.opId.get(j))
+                                            || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R1:
+                                    if (conflictR1(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R2:
+                                    if (conflictR2(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R3:
+                                    if (conflictR3(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R4:
+                                    if (conflictR4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R5:
+                                    if (conflictR5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R6:
+                                    if (conflictR6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R7:
+                                    if (conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R8:
+                                    if (conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.GW:
+                                    return true;
+                                case MultipartitionMapping.W1:
+                                    if (conflictW1(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W2:
+                                    if (conflictW2(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W3:
+                                    if (conflictW3(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W4:
+                                    if (conflictW4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W5:
+                                    if (conflictW5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W6:
+                                    if (conflictW6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W7:
+                                    if (conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W8:
+                                    if (conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R12:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR2(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R13:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR3(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R14:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R15:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R16:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R17:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R18:
+                                    if (conflictR1(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R23:
+                                    if (conflictR2(r2.opId.get(j)) || conflictR3(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R24:
+                                    if (conflictR2(r2.opId.get(j)) || conflictR4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R25:
+                                    if (conflictR2(r2.opId.get(j)) || conflictR5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R26:
+                                    if (conflictR2(r2.opId.get(j)) || conflictR6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R27:
+                                    if (conflictR2(r2.opId.get(j)) || conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R28:
+                                    if (conflictR2(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R34:
+                                    if (conflictR3(r2.opId.get(j)) || conflictR4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R35:
+                                    if (conflictR3(r2.opId.get(j)) || conflictR5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R36:
+                                    if (conflictR3(r2.opId.get(j)) || conflictR6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R37:
+                                    if (conflictR3(r2.opId.get(j)) || conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R38:
+                                    if (conflictR3(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R45:
+                                    if (conflictR4(r2.opId.get(j)) || conflictR5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R46:
+                                    if (conflictR4(r2.opId.get(j)) || conflictR6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R47:
+                                    if (conflictR4(r2.opId.get(j)) || conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R48:
+                                    if (conflictR4(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R56:
+                                    if (conflictR5(r2.opId.get(j)) || conflictR6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R57:
+                                    if (conflictR5(r2.opId.get(j)) || conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R58:
+                                    if (conflictR5(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R67:
+                                    if (conflictR6(r2.opId.get(j)) || conflictR7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R68:
+                                    if (conflictR6(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.R78:
+                                    if (conflictR7(r2.opId.get(j)) || conflictR8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W12:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW2(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W13:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW3(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W14:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W15:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W16:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W17:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W18:
+                                    if (conflictW1(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W23:
+                                    if (conflictW2(r2.opId.get(j)) || conflictW3(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W24:
+                                    if (conflictW2(r2.opId.get(j)) || conflictW4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W25:
+                                    if (conflictW2(r2.opId.get(j)) || conflictW5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W26:
+                                    if (conflictW2(r2.opId.get(j)) || conflictW6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W27:
+                                    if (conflictW2(r2.opId.get(j)) || conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W28:
+                                    if (conflictW2(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W34:
+                                    if (conflictW3(r2.opId.get(j)) || conflictW4(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W35:
+                                    if (conflictW3(r2.opId.get(j)) || conflictW5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W36:
+                                    if (conflictW3(r2.opId.get(j)) || conflictW6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W37:
+                                    if (conflictW3(r2.opId.get(j)) || conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W38:
+                                    if (conflictW3(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W45:
+                                    if (conflictW4(r2.opId.get(j)) || conflictW5(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W46:
+                                    if (conflictW4(r2.opId.get(j)) || conflictW6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W47:
+                                    if (conflictW4(r2.opId.get(j)) || conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W48:
+                                    if (conflictW4(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W56:
+                                    if (conflictW5(r2.opId.get(j)) || conflictW6(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W57:
+                                    if (conflictW5(r2.opId.get(j)) || conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W58:
+                                    if (conflictW5(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W67:
+                                    if (conflictW6(r2.opId.get(j)) || conflictW7(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W68:
+                                    if (conflictW6(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
+                                case MultipartitionMapping.W78:
+                                    if (conflictW7(r2.opId.get(j)) || conflictW8(r2.opId.get(j))) {
+                                        return true;
+                                    }
+                                    break;
 
-                    switch (r1.opId) {
-                        case MultipartitionMapping.GR:
-                            if (conflictR1(r2.opId)
-                                    || conflictR2(r2.opId)
-                                    || conflictR3(r2.opId)
-                                    || conflictR4(r2.opId)
-                                    || conflictR5(r2.opId)
-                                    || conflictR6(r2.opId)
-                                    || conflictR7(r2.opId)
-                                    || conflictR8(r2.opId)) {
-                                return true;
+                                default:
+                                    break;
                             }
-                            break;
-                        case MultipartitionMapping.R1:
-                            if (conflictR1(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R2:
-                            if (conflictR2(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R3:
-                            if (conflictR3(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R4:
-                            if (conflictR4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R5:
-                            if (conflictR5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R6:
-                            if (conflictR6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R7:
-                            if (conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R8:
-                            if (conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.GW:
-                            return true;
-                        case MultipartitionMapping.W1:
-                            if (conflictW1(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W2:
-                            if (conflictW2(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W3:
-                            if (conflictW3(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W4:
-                            if (conflictW4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W5:
-                            if (conflictW5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W6:
-                            if (conflictW6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W7:
-                            if (conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W8:
-                            if (conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R12:
-                            if (conflictR1(r2.opId) || conflictR2(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R13:
-                            if (conflictR1(r2.opId) || conflictR3(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R14:
-                            if (conflictR1(r2.opId) || conflictR4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R15:
-                            if (conflictR1(r2.opId) || conflictR5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R16:
-                            if (conflictR1(r2.opId) || conflictR6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R17:
-                            if (conflictR1(r2.opId) || conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R18:
-                            if (conflictR1(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R23:
-                            if (conflictR2(r2.opId) || conflictR3(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R24:
-                            if (conflictR2(r2.opId) || conflictR4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R25:
-                            if (conflictR2(r2.opId) || conflictR5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R26:
-                            if (conflictR2(r2.opId) || conflictR6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R27:
-                            if (conflictR2(r2.opId) || conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R28:
-                            if (conflictR2(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R34:
-                            if (conflictR3(r2.opId) || conflictR4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R35:
-                            if (conflictR3(r2.opId) || conflictR5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R36:
-                            if (conflictR3(r2.opId) || conflictR6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R37:
-                            if (conflictR3(r2.opId) || conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R38:
-                            if (conflictR3(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R45:
-                            if (conflictR4(r2.opId) || conflictR5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R46:
-                            if (conflictR4(r2.opId) || conflictR6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R47:
-                            if (conflictR4(r2.opId) || conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R48:
-                            if (conflictR4(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R56:
-                            if (conflictR5(r2.opId) || conflictR6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R57:
-                            if (conflictR5(r2.opId) || conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R58:
-                            if (conflictR5(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R67:
-                            if (conflictR6(r2.opId) || conflictR7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R68:
-                            if (conflictR6(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.R78:
-                            if (conflictR7(r2.opId) || conflictR8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W12:
-                            if (conflictW1(r2.opId) || conflictW2(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W13:
-                            if (conflictW1(r2.opId) || conflictW3(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W14:
-                            if (conflictW1(r2.opId) || conflictW4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W15:
-                            if (conflictW1(r2.opId) || conflictW5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W16:
-                            if (conflictW1(r2.opId) || conflictW6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W17:
-                            if (conflictW1(r2.opId) || conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W18:
-                            if (conflictW1(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W23:
-                            if (conflictW2(r2.opId) || conflictW3(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W24:
-                            if (conflictW2(r2.opId) || conflictW4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W25:
-                            if (conflictW2(r2.opId) || conflictW5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W26:
-                            if (conflictW2(r2.opId) || conflictW6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W27:
-                            if (conflictW2(r2.opId) || conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W28:
-                            if (conflictW2(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W34:
-                            if (conflictW3(r2.opId) || conflictW4(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W35:
-                            if (conflictW3(r2.opId) || conflictW5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W36:
-                            if (conflictW3(r2.opId) || conflictW6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W37:
-                            if (conflictW3(r2.opId) || conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W38:
-                            if (conflictW3(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W45:
-                            if (conflictW4(r2.opId) || conflictW5(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W46:
-                            if (conflictW4(r2.opId) || conflictW6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W47:
-                            if (conflictW4(r2.opId) || conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W48:
-                            if (conflictW4(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W56:
-                            if (conflictW5(r2.opId) || conflictW6(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W57:
-                            if (conflictW5(r2.opId) || conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W58:
-                            if (conflictW5(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W67:
-                            if (conflictW6(r2.opId) || conflictW7(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W68:
-                            if (conflictW6(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-                        case MultipartitionMapping.W78:
-                            if (conflictW7(r2.opId) || conflictW8(r2.opId)) {
-                                return true;
-                            }
-                            break;
-
-                        default:
-                            break;
+                        }
                     }
-
                     return false;
                 }
             };

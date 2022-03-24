@@ -316,7 +316,6 @@ public class LocalExecutionPooled {
                 }
             }
             System.out.println("Fim do envio!");
-
         }
 
         public TOMMessage addP1(Object[] e) {

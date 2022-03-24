@@ -8,6 +8,8 @@ package parallelism.scheduler;
 import bftsmart.tom.core.messages.TOMMessage;
 import bftsmart.tom.core.messages.TOMMessageType;
 import bftsmart.util.MultiOperationRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
@@ -24,6 +26,16 @@ import parallelism.hybrid.early.TOMMessageWrapper;
  * @author eduardo
  */
 public class DefaultScheduler implements Scheduler {
+
+    private static final int MAX_SIZE = 150;
+
+    private final List<TOMMessage> requestList = new ArrayList<>();
+    private final List<MultiOperationRequest> reqsList = new ArrayList<>();
+    private final List<Integer> groupIdList = new ArrayList<>();
+    private final List<Integer> indexList = new ArrayList<>();
+    private final List<Short> operationList = new ArrayList<>();
+    private final List<Short> opIdList = new ArrayList<>();
+    private final List<MultiOperationCtx> ctxList = new ArrayList<>();
 
     protected ParallelMapping mapping;
 
@@ -44,10 +56,19 @@ public class DefaultScheduler implements Scheduler {
     @Override
     public void scheduleReplicaReconfiguration() {
         TOMMessage reconf = new TOMMessage(0, 0, 0, 0, null, 0, TOMMessageType.ORDERED_REQUEST, ParallelMapping.CONFLICT_RECONFIGURATION);
-        MessageContextPair m
-                = new MessageContextPair(reconf, ParallelMapping.CONFLICT_RECONFIGURATION, -1, (short) 0, ParallelMapping.CONFLICT_RECONFIGURATION, null);
 
-        /*BlockingQueue[] q = this.getMapping().getAllQueues();
+        requestList.add(reconf);
+        groupIdList.add((int) ParallelMapping.CONFLICT_RECONFIGURATION);
+        indexList.add(-1);
+        operationList.add((short) 0);
+        opIdList.add(ParallelMapping.CONFLICT_RECONFIGURATION);
+        ctxList.add(null);
+
+        if (requestList.size() == MAX_SIZE) {
+            MessageContextPair m
+                    = new MessageContextPair(requestList, groupIdList, indexList, operationList, opIdList, ctxList);
+
+            /*BlockingQueue[] q = this.getMapping().getAllQueues();
         try {
             for (BlockingQueue q1 : q) {
                 q1.put(m);
@@ -55,12 +76,20 @@ public class DefaultScheduler implements Scheduler {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }*/
-        Queue[] q = this.getMapping().getAllQueues();
-        for (Queue q1 : q) {
-            boolean inserted = false;
-            while (!inserted) {
-                inserted = q1.offer(m);
+            Queue[] q = this.getMapping().getAllQueues();
+            for (Queue q1 : q) {
+                boolean inserted = false;
+                while (!inserted) {
+                    inserted = q1.offer(m);
+                }
             }
+
+            requestList.clear();
+            groupIdList.clear();
+            indexList.clear();
+            operationList.clear();
+            opIdList.clear();
+            ctxList.clear();
         }
 
     }
@@ -90,58 +119,75 @@ public class DefaultScheduler implements Scheduler {
             ct.executorIndex = (ct.executorIndex + 1) % ct.queues.length;
 
         } else { //sync
+            if (requestList.size() == MAX_SIZE) {
+                for (int i = 0; i < requestList.size(); i++) {
+                    ctxList.add(new MultiOperationCtx(reqsList.get(i).operations.length, request));
+                    groupIdList.add(requestList.get(i).groupId);
+                    opIdList.add(reqsList.get(i).opId);
 
-            MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
-            MultiOperationCtx ctx = new MultiOperationCtx(reqs.operations.length, request);
-
-            for (int i = 0; i < reqs.operations.length; i++) {
-                TOMMessageWrapper mw = new TOMMessageWrapper(new MessageContextPair(request, request.groupId, i, reqs.operations[i], reqs.opId, ctx));
-
-                for (Queue q : ct.queues) {
-                    boolean inserted = false;
-                    while (!inserted) {
-                        inserted = q.offer(mw);
+                    for (int j = 0; j < reqsList.get(j).operations.length; i++) {
+                        indexList.add(j);
+                        operationList.add(reqsList.get(i).operations[j]);
                     }
-                    //q.put(request);
+
+                    TOMMessageWrapper mw = new TOMMessageWrapper(new MessageContextPair(requestList, groupIdList, indexList, operationList, opIdList, ctxList));
+
+                    for (Queue q : ct.queues) {
+                        boolean inserted = false;
+                        while (!inserted) {
+                            inserted = q.offer(mw);
+                        }
+                        //q.put(request);
+                    }
                 }
+
+                requestList.clear();
+                groupIdList.clear();
+                indexList.clear();
+                operationList.clear();
+                opIdList.clear();
+                ctxList.clear();
             }
         }
 
     }
 
     @Override
-    public void schedule(MessageContextPair request) {
+    public void schedule(MessageContextPair request
+    ) {
         // try {
+        for (int i = 0; i < request.request.size(); i++) {
+            ClassToThreads ct = this.mapping.getClass(request.classId.get(i));
+            if (ct == null) {
+                //TRATAR COMO CONFLICT ALL
+                //criar uma classe que sincroniza tudo
+                System.err.println("CLASStoTHREADs MAPPING NOT FOUND");
 
-        ClassToThreads ct = this.mapping.getClass(request.classId);
-        if (ct == null) {
-            //TRATAR COMO CONFLICT ALL
-            //criar uma classe que sincroniza tudo
-            System.err.println("CLASStoTHREADs MAPPING NOT FOUND");
-
-        }
-
-        if (ct.type == ClassToThreads.CONC) {//conc
-            boolean inserted = false;
-            while (!inserted) {
-                inserted = ct.queues[ct.executorIndex].offer(request);
             }
-            //ct.queues[ct.executorIndex].put(request);
-            ct.executorIndex = (ct.executorIndex + 1) % ct.queues.length;
 
-        } else { //sync
-            for (Queue q : ct.queues) {
+            if (ct.type == ClassToThreads.CONC) {//conc
                 boolean inserted = false;
                 while (!inserted) {
-                    inserted = q.offer(request);
+                    inserted = ct.queues[ct.executorIndex].offer(request);
                 }
-                //q.put(request);
+                //ct.queues[ct.executorIndex].put(request);
+                ct.executorIndex = (ct.executorIndex + 1) % ct.queues.length;
+
+            } else { //sync
+                for (Queue q : ct.queues) {
+                    boolean inserted = false;
+                    while (!inserted) {
+                        inserted = q.offer(request);
+                    }
+                    //q.put(request);
+                }
             }
-        }
-        /* } catch (InterruptedException ex) {
+            /* } catch (InterruptedException ex) {
             ex.printStackTrace();
             Logger.getLogger(DefaultScheduler.class.getName()).log(Level.SEVERE, null, ex);
         }*/
+        }
+
     }
 
     /*public void schedule(Object request, int classId) {

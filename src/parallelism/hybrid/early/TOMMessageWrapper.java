@@ -21,8 +21,8 @@ public class TOMMessageWrapper extends TOMMessage{
         this.msg = msg;
     }
     
-    @Override
-     public int getGroupId() {
-         return msg.classId;
+//    @Override
+     public int getGroupId(int i) {
+         return msg.classId.get(i);
      }
 }

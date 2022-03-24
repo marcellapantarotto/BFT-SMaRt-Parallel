@@ -53,12 +53,10 @@ import parallelism.ParallelServiceReplica;
 import parallelism.SequentialServiceReplica;
 import parallelism.late.COSType;
 
-
 public final class ListServer implements SingleExecutable {
 
     private List<Integer> l = new LinkedList<Integer>();
 
-    
     public ListServer(int id, int initThreads, int entries, boolean late, String gType) {
 
         if (initThreads <= 0) {
@@ -66,28 +64,32 @@ public final class ListServer implements SingleExecutable {
 
             //new ServiceReplica(id, this, null);
             new SequentialServiceReplica(id, this, null);
-            
+
         } else if (late) {
             System.out.println("Replica in parallel execution model (late scheduling).");
             ConflictDefinition cd = new ConflictDefinition() {
                 @Override
                 public boolean isDependent(MessageContextPair r1, MessageContextPair r2) {
-                    if(r1.opId == ParallelMapping.SYNC_ALL ||
-                            r2.opId == ParallelMapping.SYNC_ALL){
-                        return true;
+                    for (int i = 0; i < r1.request.size(); i++) {
+                        for (int j = 0; j < r2.request.size(); j++) {
+                            if (r1.opId.get(i) == ParallelMapping.SYNC_ALL
+                                    || r2.opId.get(j) == ParallelMapping.SYNC_ALL) {
+                                return true;
+                            }
+                        }
                     }
                     return false;
                 }
             };
-            
-            if(gType.equals("coarseLock")){
-                new LateServiceReplica(id, this, null, initThreads, cd, COSType.coarseLockGraph,1);
-            }else if (gType.equals("fineLock")){
-                new LateServiceReplica(id, this, null, initThreads, cd, COSType.fineLockGraph,1);
-            }else if (gType.equals("lockFree")){
-                new LateServiceReplica(id, this, null, initThreads, cd, COSType.lockFreeGraph,1);
-            }else{
-                new LateServiceReplica(id, this, null, initThreads, cd, null,1);
+
+            if (gType.equals("coarseLock")) {
+                new LateServiceReplica(id, this, null, initThreads, cd, COSType.coarseLockGraph, 1);
+            } else if (gType.equals("fineLock")) {
+                new LateServiceReplica(id, this, null, initThreads, cd, COSType.fineLockGraph, 1);
+            } else if (gType.equals("lockFree")) {
+                new LateServiceReplica(id, this, null, initThreads, cd, COSType.lockFreeGraph, 1);
+            } else {
+                new LateServiceReplica(id, this, null, initThreads, cd, null, 1);
             }
         } else {
             System.out.println("Replica in parallel execution model (early scheduling).");
@@ -97,7 +99,7 @@ public final class ListServer implements SingleExecutable {
             //replica = new ParallelServiceReplica(id, this,this, minThreads, initThreads, maxThreads, new AgressivePolicy());
 
         }
-       for (int i = 0; i < entries; i++) {
+        for (int i = 0; i < entries; i++) {
             l.add(i);
         }
 
@@ -127,9 +129,8 @@ public final class ListServer implements SingleExecutable {
                     if (!l.contains(value)) {
                         ret = l.add(value);
                     }
-                    
+
                     //Thread.sleep(2000);
-                    
                     out = new ByteArrayOutputStream();
                     ObjectOutputStream out1 = new ObjectOutputStream(out);
                     out1.writeBoolean(ret);
@@ -157,7 +158,7 @@ public final class ListServer implements SingleExecutable {
                     out = new ByteArrayOutputStream();
                     out1 = new ObjectOutputStream(out);
                     out1.writeBoolean(l.contains(value));
-                    
+
                     /*out1.writeBoolean(true);
                     
                     Iterator<Integer> it = l.iterator();
@@ -165,8 +166,6 @@ public final class ListServer implements SingleExecutable {
                     while(it.hasNext()){
                         it.next();
                     }*/
-                    
-                    
                     out.flush();
                     out1.flush();
                     reply = out.toByteArray();
@@ -193,7 +192,6 @@ public final class ListServer implements SingleExecutable {
 
     }
 
-   
     public static void main(String[] args) {
         if (args.length < 7) {
             System.out.println("Usage: ... ListServer <processId> <num threads> <initial entries> <late scheduling?> <graph type>");
