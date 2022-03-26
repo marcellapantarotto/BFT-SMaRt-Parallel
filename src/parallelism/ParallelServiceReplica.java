@@ -57,16 +57,6 @@ public class ParallelServiceReplica extends ServiceReplica {
 
     private int partitions = 1;
 
-    private static final int MAX_SIZE = 150;
-
-    private final List<TOMMessage> requestList = new ArrayList<TOMMessage>();
-    private final List<MultiOperationRequest> reqsList = new ArrayList<>();
-    private final List<MultiOperationCtx> ctxList = new ArrayList<>();
-    private final List<Integer> indexList = new ArrayList<>();
-    private final List<Integer> groupIdList = new ArrayList<>();
-    private final List<Short> operationList = new ArrayList<>();
-    private final List<Short> opIdList = new ArrayList<>();
-
     //protected Map<String, MultiOperationCtx> ctxs = new Hashtable<>();
     public ParallelServiceReplica(int id, Executable executor, Recoverable recoverer, int initialWorkers) {
         //this(id, executor, recoverer, new DefaultScheduler(initialWorkers));
@@ -376,45 +366,26 @@ public class ParallelServiceReplica extends ServiceReplica {
         }
 
         private void execute(TOMMessage request) {
-            requestList.add(request);
 
-            if (requestList.size() == MAX_SIZE) {
-                for (int i = 0; i < requestList.size(); i++) {
-                    ctxList.add(new MultiOperationCtx(reqsList.get(i).operations.length, request));
-                    groupIdList.add(requestList.get(i).groupId);
-                    opIdList.add(reqsList.get(i).opId);
-
-                    for (int j = 0; j < reqsList.get(j).operations.length; j++) {
-                        indexList.add(j);
-                        operationList.add(reqsList.get(i).operations[j]);
-                    }
-                    this.execute(new MessageContextPair(requestList, groupIdList, indexList, operationList, opIdList, ctxList));
-                }
-
-                requestList.clear();
-                groupIdList.clear();
-                indexList.clear();
-                operationList.clear();
-                opIdList.clear();
-                ctxList.clear();
-                reqsList.clear();
+            MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
+            MultiOperationCtx ctx = new MultiOperationCtx(reqs.id1.length, request);
+            for (int i = 0; i < reqs.id1.length; i++) {
+                this.execute(new MessageContextPair(request, request.groupId, i, reqs.id1[i], reqs.id2[i], reqs.opId, ctx));
             }
         }
 
         private void execute(MessageContextPair msg) {
-            for (int i = 0; i < msg.request.size(); i++) {
-                //msg.resp = ((SingleExecutable) executor).executeOrdered(msg.operation, null);
-                msg.resp.add(((SingleExecutable) executor).executeOrdered(serialize(msg.opId.get(i), msg.operation.get(i)), null));
-                msg.ctx.get(i).add(msg.index.get(i), msg.resp.get(i));
-                if (msg.ctx.get(i).response.isComplete() && !msg.ctx.get(i).finished && (msg.ctx.get(i).interger.getAndIncrement() == 0)) {
-                    msg.ctx.get(i).finished = true;
-                    msg.ctx.get(i).request.reply = new TOMMessage(id, msg.ctx.get(i).request.getSession(),
-                            msg.ctx.get(i).request.getSequence(), msg.ctx.get(i).response.serialize(), SVController.getCurrentViewId());
+            //msg.resp = ((SingleExecutable) executor).executeOrdered(msg.operation, null);
+            msg.resp = ((SingleExecutable) executor).executeOrdered(serialize(msg.opId, msg.c1), null);
+            msg.ctx.add(msg.index, msg.resp);
+            if (msg.ctx.response.isComplete() && !msg.ctx.finished && (msg.ctx.interger.getAndIncrement() == 0)) {
+                msg.ctx.finished = true;
+                msg.ctx.request.reply = new TOMMessage(id, msg.ctx.request.getSession(),
+                        msg.ctx.request.getSequence(), msg.ctx.response.serialize(), SVController.getCurrentViewId());
 
-                    replier.manageReply(msg.ctx.get(i).request, null);
-                }
-                statistics.computeStatistics(thread_id, 1);
+                replier.manageReply(msg.ctx.request, null);
             }
+            statistics.computeStatistics(thread_id, 1);
         }
 
         public void run() {

@@ -45,9 +45,11 @@ public class LocalExecutionPooled {
         int pG = Integer.parseInt(args[3]); //globais
         int pW = Integer.parseInt(args[4]); // writes
         int numReq = Integer.parseInt(args[5]); //num requests
-        //boolean cb = Boolean.parseBoolean(args[6]); //cbase?
+        boolean n = Boolean.parseBoolean(args[6]); //é normal?
         //boolean hb = Boolean.parseBoolean(args[7]); //hybrid ?
+        System.out.println("Normal "+n);
         
+        PooledScheduler.normal = n;
         
          new LocalExecutionPooled(entries,lt,np,pG,pW,numReq);
      }
@@ -66,7 +68,7 @@ public class LocalExecutionPooled {
 
     private class Client extends Thread {
 
-        int opPerReq = 50;
+        int opPerReq = 1;
         TOMMessage[] requests = null;
         public EarlySchedulerMapping em = new EarlySchedulerMapping();
 
@@ -316,6 +318,7 @@ public class LocalExecutionPooled {
                 }
             }
             System.out.println("Fim do envio!");
+
         }
 
         public TOMMessage addP1(Object[] e) {
@@ -389,7 +392,7 @@ public class LocalExecutionPooled {
         }
 
         public TOMMessage containsP1(Object[] e) {
-            return containsFinal(e, 0, MultipartitionMapping.R1);   // R1 = identificador
+            return containsFinal(e, 0, MultipartitionMapping.R1);
         }
 
         public TOMMessage containsP2(Object[] e) {

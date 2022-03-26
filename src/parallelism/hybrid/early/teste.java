@@ -24,11 +24,13 @@ public class teste {
 
     public static void main(String[] a) {
 
-        ClassToThreads[] CtoT = generate(3, 2);
+        // ClassToThreads[] CtoT = new EarlySchedulerMapping().generateEarly(3, 2);
+        HybridClassToThreads[] CtoT = new EarlySchedulerMapping().generateMappings(3);
+       // ClassToThreads[] CtoT = generate(3, 2);
         for (int i = 0; i < CtoT.length; i++) {
             System.out.println(CtoT[i]);
 
-        }
+        }/*
 
         
         int[] p = new int[3];
@@ -37,7 +39,7 @@ public class teste {
         p[2]=2;
         
         System.out.println(getClassIdEarly("R", p));
-        System.out.println(getClassIdEarly("W", p));
+        System.out.println(getClassIdEarly("W", p));*/
     }
     
     public static int getClassIdEarly(String rORw, int... partitions) {

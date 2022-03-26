@@ -1,108 +1,74 @@
-/**
- * Copyright (c) 2007-2013 Alysson Bessani, Eduardo Alchieri, Paulo Sousa, and
- * the authors indicated in the @author tags
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
-package demo.list;
+package demo.map;
 
-import bftsmart.reconfiguration.ServerViewController;
-import bftsmart.statemanagement.ApplicationState;
-import bftsmart.statemanagement.StateManager;
-import bftsmart.statemanagement.strategy.StandardStateManager;
+import bftsmart.reconfiguration.util.TOMConfiguration;
 import bftsmart.tom.MessageContext;
-import bftsmart.tom.ReplicaContext;
 import bftsmart.tom.ServiceReplica;
-import bftsmart.tom.leaderchange.CertifiedDecision;
-import bftsmart.tom.server.Recoverable;
 import bftsmart.tom.server.SingleExecutable;
-import bftsmart.tom.server.defaultservices.DefaultApplicationState;
-import bftsmart.tom.util.Storage;
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.CsvReporter;
-import com.codahale.metrics.MetricRegistry;
+import bftsmart.tom.util.TOMUtil;
+//import com.codahale.metrics.ConsoleReporter;
+//import com.codahale.metrics.CsvReporter;
+//import com.codahale.metrics.MetricRegistry;
+import demo.list.MultipartitionMapping;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import marcella.PooledServiceReplica;
-import parallelism.ClassToThreads;
-import parallelism.late.LateServiceReplica;
-import parallelism.late.ConflictDefinition;
+//import marcella.PooledServiceReplica;
 import parallelism.MessageContextPair;
-import parallelism.ParallelMapping;
-import parallelism.ParallelServiceReplica;
 import parallelism.ParallelServiceReplica;
 import parallelism.SequentialServiceReplica;
 import parallelism.hybrid.HybridServiceReplica;
 import parallelism.hybrid.early.EarlySchedulerMapping;
 import parallelism.late.COSType;
+import parallelism.late.ConflictDefinition;
+import parallelism.late.LateServiceReplica;
 
-public final class ListServerMP implements SingleExecutable {
-
-    //private int interval;
-    //private float maxTp = -1;
-    // private boolean context;
-    private int iterations = 0;
-    private long throughputMeasurementStartTime = System.currentTimeMillis();
-
-    private long start = 0;
+/**
+ *
+ * @author eduardo
+ */
+public class MapServerMP implements SingleExecutable {
 
     public ServiceReplica replica;
-    //private StateManager stateManager;
-    //private ReplicaContext replicaContext;
 
-    private List<Integer> l1 = new LinkedList<Integer>();
-    private List<Integer> l2 = new LinkedList<Integer>();
-    private List<Integer> l3 = new LinkedList<Integer>();
-    private List<Integer> l4 = new LinkedList<Integer>();
-    private List<Integer> l5 = new LinkedList<Integer>();
-    private List<Integer> l6 = new LinkedList<Integer>();
-    private List<Integer> l7 = new LinkedList<Integer>();
-    private List<Integer> l8 = new LinkedList<Integer>();
-
-    //private int myId;
-    private PrintWriter pw;
-
-    private boolean closed = false;
-
-    //int exec = BFTList.ADD;
     int numberpartitions = 2;
 
-    public ListServerMP(int id, int initThreads, int entries, int numberPartitions, boolean cbase, boolean hibrid, boolean pooled) {
+    private TreeMap<Integer, String> map1 = new TreeMap<>();
+    private TreeMap<Integer, String> map2 = new TreeMap<>();
+    private TreeMap<Integer, String> map3 = new TreeMap<>();
+    private TreeMap<Integer, String> map4 = new TreeMap<>();
+    private TreeMap<Integer, String> map5 = new TreeMap<>();
+    private TreeMap<Integer, String> map6 = new TreeMap<>();
+    private TreeMap<Integer, String> map7 = new TreeMap<>();
+    private TreeMap<Integer, String> map8 = new TreeMap<>();
+
+    private byte[] signature;
+    
+    public MapServerMP(int id, int initThreads, int entries, int numberPartitions, boolean cbase, boolean hibrid, boolean pooled) {
 
         this.numberpartitions = numberPartitions;
 
+        
+        
         if (initThreads <= 0) {
             System.out.println("Replica in sequential execution model.");
 
@@ -656,141 +622,56 @@ public final class ListServerMP implements SingleExecutable {
                     return false;
                 }
             };
-            
+
             if (hibrid) {
                 System.out.println("Replica in parallel execution model (HYBRID).");
                 initThreads = initThreads * numberPartitions;
                 replica = new HybridServiceReplica(id, this, null, numberPartitions, cd, initThreads);
-            } else if (pooled){
+            } else if (pooled) {
                 System.out.println("Replica in parallel execution model (POOLED).");
-                MetricRegistry metrics = new MetricRegistry();
-                 
+                /*MetricRegistry metrics = new MetricRegistry();
+
                 replica = new PooledServiceReplica(id, initThreads, this, null, cd, metrics);
-                  
+
                 File metricsPath = createMetricsDirectory();
                 CsvReporter csvReporter = CsvReporter.forRegistry(metrics).convertRatesTo(TimeUnit.SECONDS).build(metricsPath);
                 csvReporter.start(1, TimeUnit.SECONDS);
 
-                ConsoleReporter consoleReporter =  ConsoleReporter
-                            .forRegistry(metrics)
-                            .convertRatesTo(TimeUnit.SECONDS)
-                            .build();
-                consoleReporter.start(10, TimeUnit.SECONDS);
-                 
-            }else{
+                ConsoleReporter consoleReporter = ConsoleReporter
+                        .forRegistry(metrics)
+                        .convertRatesTo(TimeUnit.SECONDS)
+                        .build();
+                consoleReporter.start(10, TimeUnit.SECONDS);*/
+
+            } else {
                 System.out.println("Replica in parallel execution model (CBASE).");
-                replica = new LateServiceReplica(id, this, null, initThreads, cd, COSType.lockFreeGraph, numberPartitions);
+                replica = new LateServiceReplica(id, this, null, initThreads , cd, COSType.lockFreeGraph, numberPartitions);
 
             }
         } else {
             System.out.println("Replica in parallel execution model (early).");
-
-           /* if (numberPartitions == 1) {
-                
-                
-                
-                replica = new ParallelServiceReplica(id, this, null, initThreads);
-            }else{*/
-                replica = new ParallelServiceReplica(id, this, null, (initThreads*numberPartitions), numberPartitions,
-                        new EarlySchedulerMapping().generateEarly(numberPartitions, initThreads));
-           // }
-            /*} else if (numberPartitions == 2) {
-                if (initThreads == 2) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T2());
-                } else if (initThreads == 4) {
-                    System.out.println("4T-2S normal");
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T4TunnedW1());
-
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T4TunnedR1());
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T4());
-                    //System.out.println("Naive 4T-2S");
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getNaiveP2T4());
-                } else if (initThreads == 8) {
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T8TunnedW1());
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T8TunnedR1());
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T8());
-                } else if (initThreads == 10) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP2T10());
-                } else {
-                    initThreads = 12;
-                    //System.out.println("CONFIGURADO PARA 12 WRITE");
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T12TunnedW1());
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T12TunnedR1());
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T12());
-
-                    System.out.println("Vai testar RW");
-
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P2T12RW());
-                }
-            } else if (numberPartitions == 4) {
-                if (initThreads == 2) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P4T2());
-                } else if (initThreads == 4) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P4T4());
-                } else if (initThreads == 8) {
-                    //System.out.println("Naive 8T-4S");
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P4T8());
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getNaiveP4T8());
-                } else if (initThreads == 10) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP4T10());
-                } else {
-                    initThreads = 12;
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getM2P4T12());
-                }
-            } else if (numberPartitions == 6) {
-                if (initThreads == 6) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP6T6());
-                } else if (initThreads == 12) {
-                    //System.out.println("Naive 12T-6S");
-                    //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP6T12());
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getNaiveP6T12());
-                } else if (initThreads == 10) {
-                    replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP6T10());
-                } else {
-                    System.exit(0);
-                }
-            } else if (initThreads == 8) {
-                replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP8T8());
-            } else if (initThreads == 10) {
-                replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP8T10());
-            } else if (initThreads == 16) {
-                //replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getP8T16());
-                System.out.println("Naive 16T-8S");
-                replica = new ParallelServiceReplica(id, this, null, initThreads, MultipartitionMapping.getNaiveP8T16());
-            } else {
-                System.exit(0);
-            }*/
+            replica = new ParallelServiceReplica(id, this, null, (initThreads * numberPartitions), numberPartitions,
+                    new EarlySchedulerMapping().generateEarly(numberPartitions, initThreads));
 
         }
 
-//        this.interval = interval;
-        //this.context = context;
-        //this.myId = id;
         for (int i = 0; i < entries; i++) {
-            l1.add(i);
-            l2.add(i);
-            l3.add(i);
-            l4.add(i);
-            l5.add(i);
-            l6.add(i);
-            l7.add(i);
-            l8.add(i);
-            //System.out.println("adicionando key: "+i);
+            this.map1.put(i, "Value_" + i);
+            this.map2.put(i, "Value_" + i);
+            this.map3.put(i, "Value_" + i);
+            this.map4.put(i, "Value_" + i);
+            this.map5.put(i, "Value_" + i);
+            this.map6.put(i, "Value_" + i);
+            this.map7.put(i, "Value_" + i);
+            this.map8.put(i, "Value_" + i);
         }
 
-        /*try {
-            File f = new File("resultado_" + id + ".txt");
-            FileWriter fw = new FileWriter(f);
-            pw = new PrintWriter(fw);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
-        }*/
+        signature = TOMUtil.signMessage(replica.getReplicaContext().getStaticConfiguration().getRSAPrivateKey(), new String("CASA").getBytes());
+        
         System.out.println("Server initialization complete!");
     }
 
-     private static File createMetricsDirectory() {
+   /* private static File createMetricsDirectory() {
         File dir = new File("./metrics");
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
@@ -802,9 +683,9 @@ public final class ListServerMP implements SingleExecutable {
             System.exit(1);
         }
         return dir;
-    }
-    
-     
+    }*/
+
+
     
     public byte[] executeOrdered(byte[] command, MessageContext msgCtx) {
         return execute(command, msgCtx);
@@ -814,11 +695,10 @@ public final class ListServerMP implements SingleExecutable {
         return execute(command, msgCtx);
     }
 
-    //ByteArrayOutputStream baos = new ByteArrayOutputStream();
-   // DataOutputStream oos = new DataOutputStream(baos);
-
     public byte[] execute(byte[] command, MessageContext msgCtx) {
 
+        TOMUtil.verifySignature(replica.getReplicaContext().getStaticConfiguration().getRSAPublicKey(), new String("CASA").getBytes(), signature);
+        
         try {
             ByteArrayInputStream in = new ByteArrayInputStream(command);
             ByteArrayOutputStream out = null;
@@ -868,76 +748,92 @@ public final class ListServerMP implements SingleExecutable {
         boolean ret = false;
         switch (pId) {
             case MultipartitionMapping.W1:
-                if (!l1.contains(value)) {
-                    ret = l1.add(value);
+                if (!map1.containsKey(value)) {
+                    map1.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.W2:
-                if (!l2.contains(value)) {
-                    ret = l2.add(value);
-               }
+                if (!map2.containsKey(value)) {
+                    map2.put(value, "Value_" + value);
+                    ret = true;
+                }
                 return ret;
             case MultipartitionMapping.W3:
-               if (!l3.contains(value)) {
-                    ret = l3.add(value);
+                if (!map3.containsKey(value)) {
+                    map3.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.W4:
-                if (!l4.contains(value)) {
-                    ret = l4.add(value);
+                if (!map4.containsKey(value)) {
+                    map4.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.W5:
-               if (!l5.contains(value)) {
-                    ret = l5.add(value);
+                if (!map5.containsKey(value)) {
+                    map5.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.W6:
-               if (!l6.contains(value)) {
-                    ret = l6.add(value);
+                if (!map6.containsKey(value)) {
+                    map6.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.W7:
-                if (!l7.contains(value)) {
-                    ret = l7.add(value);
+                if (!map7.containsKey(value)) {
+                    map7.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.W8:
-                if (!l8.contains(value)) {
-                    ret = l8.add(value);
+                if (!map8.containsKey(value)) {
+                    map8.put(value, "Value_" + value);
+                    ret = true;
                 }
                 return ret;
             case MultipartitionMapping.GW:
-                if (!l1.contains(value)) {
-                    ret = l1.add(value);
+                if (!map1.containsKey(value)) {
+                    map1.put(value, "Value_" + value);
+                    ret = true;
                 }
-               if (!l2.contains(value)) {
-                    ret = l2.add(value);
+                if (!map2.containsKey(value)) {
+                    map2.put(value, "Value_" + value);
+                    ret = true;
                 }
+
                 if (numberpartitions >= 4) {
-                    if (!l3.contains(value)) {
-                        ret = l3.add(value);
+                    if (!map3.containsKey(value)) {
+                        map3.put(value, "Value_" + value);
+                        ret = true;
                     }
-                    if (!l4.contains(value)) {
-                        ret = l4.add(value);
+                    if (!map4.containsKey(value)) {
+                        map4.put(value, "Value_" + value);
+                        ret = true;
                     }
 
                     if (numberpartitions >= 6) {
 
-                        if (!l5.contains(value)) {
-                            ret = l5.add(value);
+                        if (!map5.containsKey(value)) {
+                            map5.put(value, "Value_" + value);
+                            ret = true;
                         }
-                        if (!l6.contains(value)) {
-                            ret = l6.add(value);
+                        if (!map6.containsKey(value)) {
+                            map6.put(value, "Value_" + value);
+                            ret = true;
                         }
 
                         if (numberpartitions >= 8) {
-
-                            if (!l7.contains(value)) {
-                                ret = l7.add(value);
+                            if (!map7.containsKey(value)) {
+                                map7.put(value, "Value_" + value);
+                                ret = true;
                             }
-                            if (!l8.contains(value)) {
-                                ret = l8.add(value);
+                            if (!map8.containsKey(value)) {
+                                map8.put(value, "Value_" + value);
+                                ret = true;
                             }
                         }
                     }
@@ -945,12 +841,16 @@ public final class ListServerMP implements SingleExecutable {
 
                 return ret;
             default: //conflito de add em dois shards... pego dois qualquer, pois não adiciona por causa do contains
-                if (!l1.contains(value)) {
-                    ret = l1.add(value);
+
+                if (!map1.containsKey(value)) {
+                    map1.put(value, "Value_" + value);
+                    ret = true;
                 }
-                if (!l2.contains(value)) {
-                    ret = l2.add(value);
+                if (!map2.containsKey(value)) {
+                    map2.put(value, "Value_" + value);
+                    ret = true;
                 }
+
                 break;
         }
         return ret;
@@ -962,61 +862,61 @@ public final class ListServerMP implements SingleExecutable {
         boolean ret = false;
         switch (pId) {
             case MultipartitionMapping.R1:
-                l1.contains(value);
+                map1.containsKey(value);
                 break;
             case MultipartitionMapping.R2:
-                l2.contains(value);
+                map2.containsKey(value);
                 break;
             case MultipartitionMapping.R3:
-                l3.contains(value);
+                map3.containsKey(value);
                 break;
             case MultipartitionMapping.R4:
-                l4.contains(value);
+                map4.containsKey(value);
                 break;
             case MultipartitionMapping.R5:
-                l5.contains(value);
+                map5.containsKey(value);
                 break;
             case MultipartitionMapping.R6:
-                l6.contains(value);
+                map6.containsKey(value);
                 break;
             case MultipartitionMapping.R7:
-                l7.contains(value);
+                map7.containsKey(value);
                 break;
             case MultipartitionMapping.R8:
-                l8.contains(value);
+                map8.containsKey(value);
                 break;
             case MultipartitionMapping.GR:
 
                 if (this.numberpartitions == 2) {
-                    l1.contains(value);
-                    l2.contains(value);
+                    map1.containsKey(value);
+                    map2.containsKey(value);
                 } else if (this.numberpartitions == 4) {
-                    l1.contains(value);
-                    l2.contains(value);
-                    l3.contains(value);
-                    l4.contains(value);
+                    map1.containsKey(value);
+                    map2.containsKey(value);
+                    map3.containsKey(value);
+                    map4.containsKey(value);
 
                 } else if (this.numberpartitions == 6) {
-                    l1.contains(value);
-                    l2.contains(value);
-                    l3.contains(value);
-                    l4.contains(value);
-                    l5.contains(value);
-                    l6.contains(value);
+                    map1.containsKey(value);
+                    map2.containsKey(value);
+                    map3.containsKey(value);
+                    map4.containsKey(value);
+                    map5.containsKey(value);
+                    map6.containsKey(value);
                 } else { // 8 partitions 
-                    l1.contains(value);
-                    l2.contains(value);
-                    l3.contains(value);
-                    l4.contains(value);
-                    l5.contains(value);
-                    l6.contains(value);
-                    l7.contains(value);
-                    l8.contains(value);
+                    map1.containsKey(value);
+                    map2.containsKey(value);
+                    map3.containsKey(value);
+                    map4.containsKey(value);
+                    map5.containsKey(value);
+                    map6.containsKey(value);
+                    map7.containsKey(value);
+                    map8.containsKey(value);
                 }
                 break;
             default: //conflito de contains em dois shards... pego dois qualquer (pois o add nao adiciona, dai nao tem problema)
-                l1.contains(value);
-                l2.contains(value);
+                map1.containsKey(value);
+                map2.containsKey(value);
                 break;
         }
         return ret;
@@ -1035,7 +935,7 @@ public final class ListServerMP implements SingleExecutable {
         boolean cbase = Boolean.parseBoolean(args[4]);
         boolean h = Boolean.parseBoolean(args[5]);
 
-        new ListServerMP(processId, initialNT, entries, part, cbase, h, false);
+        new MapServerMP(processId, initialNT, entries, part, cbase, h, false);
     }
 
 }

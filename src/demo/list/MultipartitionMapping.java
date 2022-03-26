@@ -13,7 +13,6 @@ import parallelism.ClassToThreads;
  */
 public class MultipartitionMapping {
     
-    // contains - não conflita com nada
     public static final short R1 = 11;
     public static final short R2 = 12;
     public static final short R3 = 13;
@@ -23,7 +22,6 @@ public class MultipartitionMapping {
     public static final short R7 = 17;
     public static final short R8 = 18;
     
-    // add
     public static final short W1 = 21;
     public static final short W2 = 22;
     public static final short W3 = 23;
@@ -33,11 +31,10 @@ public class MultipartitionMapping {
     public static final short W7 = 27;
     public static final short W8 = 28;
     
-    // globals - ação em todas as partições
     public static final short GR = 31;
     public static final short GW = 41;
     
-    // só leitura - não conflita
+    
     public static final short R12 = 112;
     public static final short R13 = 113;
     public static final short R14 = 114;
@@ -67,7 +64,6 @@ public class MultipartitionMapping {
     public static final short R68 = 168;
     public static final short R78 = 178;
     
-    // escrita - conflita
     public static final short W12 = 212;
     public static final short W13 = 213;
     public static final short W14 = 214;

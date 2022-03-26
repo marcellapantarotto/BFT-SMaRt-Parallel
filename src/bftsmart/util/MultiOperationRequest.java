@@ -21,16 +21,25 @@ import java.util.logging.Logger;
  */
 public class MultiOperationRequest {
 
-    public short[] operations;
+    public short[] id1;
+    public short[] id2;
     public short opId;
 
     public MultiOperationRequest(int number, short opId) {
-        this.operations = new short[number];
+        this.id1 = new short[number];
+      //  this.id2 = new short[number];
         this.opId = opId;
     }
+    
+      public void add(int index, short data){
+        //  throw new UnsupportedOperationException();
+        this.id1[index] = data;
+      }
 
-    public void add(int index, short data){
-        this.operations[index] = data;
+    public void add(int index, short c1, short c2){
+        //this.id1[index] = c1;
+        //this.id2[index] = c2;
+          throw new UnsupportedOperationException();
     }
     
     public MultiOperationRequest(byte[] buffer) {
@@ -41,10 +50,13 @@ public class MultiOperationRequest {
             
             this.opId = dis.readShort();
             
-            this.operations = new short[dis.readShort()];
+            int size = dis.readShort();
+            this.id1= new short[size];
+           // this.id2= new short[size];
             
-            for(int i = 0; i < this.operations.length; i++){
-                this.operations[i] = dis.readShort();
+            for(int i = 0; i < this.id1.length; i++){
+                this.id1[i] = dis.readShort();
+                //this.id2[i] = dis.readShort();
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -66,10 +78,11 @@ public class MultiOperationRequest {
             
             oos.writeShort(opId);
             
-            oos.writeShort(operations.length);
+            oos.writeShort(id1.length);
             
-            for(int i = 0; i < operations.length; i++){
-                oos.writeShort(this.operations[i]);
+            for(int i = 0; i < id1.length; i++){
+                oos.writeShort(this.id1[i]);
+                //oos.writeShort(this.id2[i]);
             }
             oos.close();
             return baos.toByteArray();

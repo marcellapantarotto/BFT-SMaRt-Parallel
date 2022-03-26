@@ -93,39 +93,37 @@ public class LateServiceReplica extends ParallelServiceReplica {
 
                 msg = ((DependencyGraph.vNode) node).getAsRequest();
                 //System.out.println("Pegou req..."+ msg.toString());
-
-                for (int i = 0; i < msg.request.size(); i++) {
-                    if (msg.classId.get(i) == (int) ParallelMapping.CONFLICT_RECONFIGURATION) {
-                        try {
-                            getReconfBarrier().await();
-                            getReconfBarrier().await();
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    } else {
-                        //msg.resp = ((SingleExecutable) executor).executeOrdered( msg.operation, null);
-                        //exec++;
-                        msg.resp.add(((SingleExecutable) executor).executeOrdered(serialize(msg.opId.get(i), msg.operation.get(i)), null));
-
-                        //System.out.println(thread_id+" Executadas: "+exec);
-                        //MultiOperationCtx ctx = ctxs.get(msg.request.toString());
-                        msg.ctx.get(i).add(msg.index.get(i), msg.resp.get(i));
-                        if (msg.ctx.get(i).response.isComplete() && !msg.ctx.get(i).finished && (msg.ctx.get(i).interger.getAndIncrement() == 0)) {
-                            msg.ctx.get(i).finished = true;
-                            msg.ctx.get(i).request.reply = new TOMMessage(id, msg.ctx.get(i).request.getSession(),
-                                    msg.ctx.get(i).request.getSequence(), msg.ctx.get(i).response.serialize(), SVController.getCurrentViewId());
-                            //bftsmart.tom.util.Logger.println("(ParallelServiceReplica.receiveMessages) sending reply to "
-                            //      + msg.message.getSender());
-                            //TODO:only for local execution
-                            replier.manageReply(msg.ctx.get(i).request, null);
-                        }
-                        statistics.computeStatistics(thread_id, 1);
+                if (msg.classId == ParallelMapping.CONFLICT_RECONFIGURATION) {
+                    try {
+                        getReconfBarrier().await();
+                        getReconfBarrier().await();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
+                } else {
+                    //msg.resp = ((SingleExecutable) executor).executeOrdered( msg.operation, null);
+                    //exec++;
+                    msg.resp = ((SingleExecutable) executor).executeOrdered(serialize(msg.opId, msg.c1), null);
+
+                    //System.out.println(thread_id+" Executadas: "+exec);
+                    //MultiOperationCtx ctx = ctxs.get(msg.request.toString());
+                    msg.ctx.add(msg.index, msg.resp);
+                    if (msg.ctx.response.isComplete() && !msg.ctx.finished && (msg.ctx.interger.getAndIncrement() == 0)) {
+                        msg.ctx.finished = true;
+                        msg.ctx.request.reply = new TOMMessage(id, msg.ctx.request.getSession(),
+                                msg.ctx.request.getSequence(), msg.ctx.response.serialize(), SVController.getCurrentViewId());
+                        //bftsmart.tom.util.Logger.println("(ParallelServiceReplica.receiveMessages) sending reply to "
+                        //      + msg.message.getSender());
+                        //TODO:only for local execution
+                        replier.manageReply(msg.ctx.request, null);
+                    }
+                    statistics.computeStatistics(thread_id, 1);
                 }
 
                 //s.removeRequest(msg);
                 s.remove(node);
             }
         }
+
     }
 }
