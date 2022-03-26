@@ -7,8 +7,6 @@ package parallelism.late;
 
 import bftsmart.tom.core.messages.TOMMessage;
 import bftsmart.util.MultiOperationRequest;
-import java.util.ArrayList;
-import java.util.List;
 import parallelism.late.graph.COS;
 import parallelism.MessageContextPair;
 import parallelism.MultiOperationCtx;
@@ -28,16 +26,6 @@ public class LateScheduler implements Scheduler {
     private int numWorkers;
 
     //private ConflictDefinition conflictDef;
-    private static final int MAX_SIZE = 150;
-
-    private final List<TOMMessage> requestList = new ArrayList<TOMMessage>();
-    private final List<MultiOperationRequest> reqsList = new ArrayList<>();
-    private final List<MultiOperationCtx> ctxList = new ArrayList<>();
-    private final List<Integer> indexList = new ArrayList<>();
-    private final List<Integer> groupIdList = new ArrayList<>();
-    private final List<Short> operationList = new ArrayList<>();
-    private final List<Short> opIdList = new ArrayList<>();
-
     public LateScheduler(int numWorkers, COSType cosType) {
         this(null, numWorkers, cosType);
     }
@@ -76,30 +64,10 @@ public class LateScheduler implements Scheduler {
 
     @Override
     public void schedule(TOMMessage request) {
-        requestList.add(request);
-        reqsList.add(new MultiOperationRequest(request.getContent()));
-
-        if (requestList.size() == MAX_SIZE) {
-            for (int i = 0; i < requestList.size(); i++) {
-                ctxList.add(new MultiOperationCtx(reqsList.get(i).operations.length, request));
-                groupIdList.add(requestList.get(i).groupId);
-                opIdList.add(reqsList.get(i).opId);
-
-                for (int j = 0; j < reqsList.get(i).operations.length; j++) {
-                    indexList.add(j);
-                    operationList.add(reqsList.get(i).operations[j]);
-                }
-
-                this.schedule(new MessageContextPair(requestList, groupIdList, indexList, operationList, opIdList, ctxList));
-            }
-
-            requestList.clear();
-            groupIdList.clear();
-            indexList.clear();
-            operationList.clear();
-            opIdList.clear();
-            ctxList.clear();
-            reqsList.clear();
+        MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
+        MultiOperationCtx ctx = new MultiOperationCtx(reqs.id1.length, request);
+        for (int i = 0; i < reqs.id1.length; i++) {
+            this.schedule(new MessageContextPair(request, request.groupId, i, reqs.id1[i], reqs.id2[i], reqs.opId, ctx));
         }
     }
 
@@ -133,15 +101,8 @@ public class LateScheduler implements Scheduler {
 
     @Override
     public void scheduleReplicaReconfiguration() {
-        List<TOMMessage> requestListAux = new ArrayList<>(null);
-        List<Integer> groupIdListAux = new ArrayList<>(ParallelMapping.CONFLICT_RECONFIGURATION);
-        List<Integer> indexListAux = new ArrayList<>(-1);
-        List<Short> operationListAux = new ArrayList<>((short) 0);
-        List<Short> opIdListAux = new ArrayList<>((short) ParallelMapping.CONFLICT_RECONFIGURATION);
-        List<MultiOperationCtx> ctxListAux = new ArrayList<>(null);
-
         MessageContextPair m
-                = new MessageContextPair(requestListAux, groupIdListAux, indexListAux, operationListAux, opIdListAux, ctxListAux);
+                = new MessageContextPair(null, ParallelMapping.CONFLICT_RECONFIGURATION, -1, (short) 0, (short) 0, (short) ParallelMapping.CONFLICT_RECONFIGURATION, null);
         schedule(m);
     }
 

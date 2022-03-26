@@ -79,6 +79,7 @@ public class ConsolidateResults {
                                 
                 
                 for (String w : workers) {
+                    
                     String pathL = "results_g/lockfree_" + partition + "_" + w + "_1000_5_5.txt";
                     double tp = loadTP1(pathL);
                     line = line + " " + tp;
@@ -139,8 +140,8 @@ public class ConsolidateResults {
                 }
                 
                 for (String w : workers) {
-                    
-                    String pathH = "resultsLockFree_" + id + "_" + partition + "_" + w + ".txt";
+                     int nw=Integer.parseInt(w)*Integer.parseInt(partition);
+                    String pathH = "resultsLockFree_" + id + "_" + partition + "_" + nw + ".txt";
                     double tpH = loadTP(pathH);
                     line = line + " " + tpH;
                 }

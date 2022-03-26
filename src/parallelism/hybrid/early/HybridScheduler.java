@@ -61,34 +61,32 @@ public class HybridScheduler implements Scheduler {
 
     @Override
     public void schedule(TOMMessage request) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HybridClassToThreads ct = this.getClass(request.groupId);
+        if (ct == null) {
+            System.err.println("CLASStoTHREADs MAPPING NOT FOUND: "+request.groupId);
+        } else if (ct.type == HybridClassToThreads.CONC) {//conc (só tem uma thread, então vai ser sempre na posição 0)
+            boolean inserted = false;
+            while (!inserted) {
+                inserted = ct.queues[0].offer(request);
+            }
+        } else { //sync (adicionar em todas as filas)... ja cria o node FAZER O BATCH EM UM UNICO NODE AQUI
 
-//        HybridClassToThreads ct = this.getClass(request.groupId);
-//        if (ct == null) {
-//            System.err.println("CLASStoTHREADs MAPPING NOT FOUND");
-//        } else if (ct.type == HybridClassToThreads.CONC) {//conc (só tem uma thread, então vai ser sempre na posição 0)
-//            boolean inserted = false;
-//            while (!inserted) {
-//                inserted = ct.queues[0].offer(request);
-//            }
-//        } else { //sync (adicionar em todas as filas)... ja cria o node FAZER O BATCH EM UM UNICO NODE AQUI
-//
-//            MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
-//            MultiOperationCtx ctx = new MultiOperationCtx(reqs.operations.length, request);
-//            for (int i = 0; i < reqs.operations.length; i++) {
-//                TOMMessageWrapper mw = new TOMMessageWrapper(new MessageContextPair(request, request.groupId, i, reqs.operations[i], reqs.opId, ctx));
-//                mw.msg.node = new HybridLockFreeNode(mw.msg, Vertex.MESSAGE, null, queues.length, ct.tIds.length);
-//                mw.msg.threadId = ct.tIds[ct.threadIndex];
-//                ct.threadIndex = (ct.threadIndex + 1) % ct.tIds.length;
-//
-//                for (Queue q : ct.queues) {
-//                    boolean inserted = false;
-//                    while (!inserted) {
-//                        inserted = q.offer(mw);
-//                    }
-//                }
-//            }
-//        }
+            MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
+            MultiOperationCtx ctx = new MultiOperationCtx(reqs.id1.length, request);
+            for (int i = 0; i < reqs.id1.length; i++) {
+                TOMMessageWrapper mw = new TOMMessageWrapper(new MessageContextPair(request, request.groupId, i, reqs.id1[i], reqs.id2[i], reqs.opId, ctx));
+                mw.msg.node = new HybridLockFreeNode(mw.msg, Vertex.MESSAGE, null, queues.length, ct.tIds.length);
+                mw.msg.threadId = ct.tIds[ct.threadIndex];
+                ct.threadIndex = (ct.threadIndex + 1) % ct.tIds.length;
+
+                for (Queue q : ct.queues) {
+                    boolean inserted = false;
+                    while (!inserted) {
+                        inserted = q.offer(mw);
+                    }
+                }
+            }
+        }
     }
 
     @Override

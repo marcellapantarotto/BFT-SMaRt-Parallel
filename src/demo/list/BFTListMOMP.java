@@ -26,7 +26,7 @@ public class BFTListMOMP<V> extends BFTList<V> {
         super(id, parallelExecution);
     }
     
-    public boolean addP1(V[] e) {
+    /*public boolean addP1(V[] e) {
         return addFinal(e, em.getClassIdEarly("W",0), MultipartitionMapping.W1);
         //return addFinal(e, ParallelMapping.SYNC_ALL, MultipartitionMapping.W1);
     }
@@ -57,9 +57,9 @@ public class BFTListMOMP<V> extends BFTList<V> {
 
     public boolean addP8(V[] e) {
         return addFinal(e, em.getClassIdEarly("W",7), MultipartitionMapping.W8);
-    }
+    }/**/
 
-   /* public boolean addP1(V[] e) {
+    public boolean addP1(V[] e) {
         return addFinal(e, em.getClassId(0), MultipartitionMapping.W1);
         //return addFinal(e, ParallelMapping.SYNC_ALL, MultipartitionMapping.W1);
     }
@@ -90,7 +90,7 @@ public class BFTListMOMP<V> extends BFTList<V> {
 
     public boolean addP8(V[] e) {
         return addFinal(e, em.getClassId(7), MultipartitionMapping.W8);
-    }*/
+    }
 
     public boolean addFinal(V[] e, int pId, int opId) {
 
@@ -161,9 +161,9 @@ public class BFTListMOMP<V> extends BFTList<V> {
 
         }
         if (partitions.length > 0) {
-            //byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassId(partitions));
+            byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassId(partitions));
             //System.out.println(opId+" ReqID ADD ALL: "+em.getClassIdEarly("W",partitions));
-            byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassIdEarly("W",partitions));
+            //byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassIdEarly("W",partitions));
         } else {
             byte[] rep = proxy.invokeParallel(mo.serialize(), MultipartitionMapping.GW);
         }
@@ -198,7 +198,7 @@ public class BFTListMOMP<V> extends BFTList<V> {
         //return true;
     }
 
-    public boolean containsP1(V[] e) {
+    /*public boolean containsP1(V[] e) {
         //return containsFinal(e, em.getClassId(0), MultipartitionMapping.R1);
         return containsFinal(e, em.getClassIdEarly("R",0), MultipartitionMapping.R1);
         //return containsFinal(e, ParallelMapping.CONC_ALL, MultipartitionMapping.R1);
@@ -230,6 +230,39 @@ public class BFTListMOMP<V> extends BFTList<V> {
 
     public boolean containsP8(V[] e) {
         return containsFinal(e, em.getClassIdEarly("R",7), MultipartitionMapping.R8);
+    }/**/
+    
+    public boolean containsP1(V[] e) {
+        return containsFinal(e, em.getClassId(0), MultipartitionMapping.R1);
+        
+    }
+
+    public boolean containsP2(V[] e) {
+        return containsFinal(e, em.getClassId(1), MultipartitionMapping.R1);
+    }
+
+    public boolean containsP3(V[] e) {
+        return containsFinal(e, em.getClassId(2), MultipartitionMapping.R1);
+    }
+
+    public boolean containsP4(V[] e) {
+        return containsFinal(e, em.getClassId(3), MultipartitionMapping.R1);
+    }
+
+    public boolean containsP5(V[] e) {
+        return containsFinal(e, em.getClassId(4), MultipartitionMapping.R1);
+    }
+
+    public boolean containsP6(V[] e) {
+        return containsFinal(e, em.getClassId(5), MultipartitionMapping.R1);
+    }
+
+    public boolean containsP7(V[] e) {
+        return containsFinal(e, em.getClassId(6), MultipartitionMapping.R1);
+    }
+
+    public boolean containsP8(V[] e) {
+        return containsFinal(e, em.getClassId(7), MultipartitionMapping.R1);
     }
 
     public boolean containsFinal(V[] e, int pId, short opId) {
@@ -284,11 +317,11 @@ public class BFTListMOMP<V> extends BFTList<V> {
 
         }
         if (partitions.length > 0) {
-            //byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassId(partitions));
+            byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassId(partitions));
             
             //System.out.println(opId+" ReqID CONT MULTI: "+em.getClassIdEarly("R",partitions));
             
-            byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassIdEarly("R",partitions));
+            //byte[] rep = proxy.invokeParallel(mo.serialize(), em.getClassIdEarly("R",partitions));
         } else {
             byte[] rep = proxy.invokeParallel(mo.serialize(), MultipartitionMapping.GR);
         }

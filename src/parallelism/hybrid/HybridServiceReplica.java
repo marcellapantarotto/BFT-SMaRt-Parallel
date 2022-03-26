@@ -98,36 +98,34 @@ public class HybridServiceReplica extends ParallelServiceReplica {
 
         @Override
         public void run() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            while (true) {
+                //MessageContextPair msg = reqs.poll();
+                TOMMessage request = reqs.poll();
+                if (request != null) {
+                    HybridClassToThreads ct = ((HybridScheduler) scheduler).getClass(request.getGroupId());
+                    if (ct.type == HybridClassToThreads.CONC) {
+                        MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
+                        MultiOperationCtx ctx = new MultiOperationCtx(reqs.id1.length, request);
+                        for (int i = 0; i < reqs.id1.length; i++) {
 
-//            while (true) {
-//                //MessageContextPair msg = reqs.poll();
-//                TOMMessage request = reqs.poll();
-//                if (request != null) {
-//                    HybridClassToThreads ct = ((HybridScheduler) scheduler).getClass(request.getGroupId());
-//                    if (ct.type == HybridClassToThreads.CONC) {
-//                        MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
-//                        MultiOperationCtx ctx = new MultiOperationCtx(reqs.operations.length, request);
-//                        for (int i = 0; i < reqs.operations.length; i++) {
-//
-//                            subgraphs[thread_id].insert(new HybridLockFreeNode(
-//                                    new MessageContextPair(request, request.groupId, i, reqs.operations[i], reqs.opId, ctx),
-//                                    Vertex.MESSAGE, subgraphs[thread_id], subgraphs.length, 0), false, false);
-//
-//                        }
-//
-//                    } else if (ct.type == HybridClassToThreads.SYNC) {
-//                        TOMMessageWrapper mw = (TOMMessageWrapper) request;
-//
-//                        if (mw.msg.threadId == thread_id) {
-//                            mw.msg.node.graph = subgraphs[thread_id];
-//                            subgraphs[thread_id].insert(mw.msg.node, false, true);
-//                        } else {
-//                            subgraphs[thread_id].insert(mw.msg.node, true, true);
-//                        }
-//                    }
-//                }
-//            }
+                            subgraphs[thread_id].insert(new HybridLockFreeNode(
+                                    new MessageContextPair(request, request.groupId, i, reqs.id1[i], reqs.id2[i], reqs.opId, ctx),
+                                    Vertex.MESSAGE, subgraphs[thread_id], subgraphs.length, 0), false, false);
+
+                        }
+
+                    } else if (ct.type == HybridClassToThreads.SYNC) {
+                        TOMMessageWrapper mw = (TOMMessageWrapper) request;
+
+                        if (mw.msg.threadId == thread_id) {
+                            mw.msg.node.graph = subgraphs[thread_id];
+                            subgraphs[thread_id].insert(mw.msg.node, false, true);
+                        } else {
+                            subgraphs[thread_id].insert(mw.msg.node, true, true);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -159,38 +157,36 @@ public class HybridServiceReplica extends ParallelServiceReplica {
         }
 
         public void run() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            //System.out.println("rum: " + thread_id);
+            MessageContextPair msg = null;
+            //int exec = 0;
+            while (true) {
+                try {
+                    //get
+                    HybridLockFreeNode node = subgraphs[this.myPartition].get();
+                    //execute
+                    msg = node.getAsRequest();
+                    //msg.resp = ((SingleExecutable) executor).executeOrdered(msg.operation, null);
+                    msg.resp = ((SingleExecutable) executor).executeOrdered(serialize(msg.opId, msg.c1), null);
 
-//            //System.out.println("rum: " + thread_id);
-//            MessageContextPair msg = null;
-//            //int exec = 0;
-//            while (true) {
-//                try {
-//                    //get
-//                    HybridLockFreeNode node = subgraphs[this.myPartition].get();
-//                    //execute
-//                    msg = node.getAsRequest();
-//                    //msg.resp = ((SingleExecutable) executor).executeOrdered(msg.operation, null);
-//                    msg.resp = ((SingleExecutable) executor).executeOrdered(serialize(msg.opId, msg.operation), null);
-//
-//                    //MultiOperationCtx ctx = ctxs.get(msg.request.toString());
-//                    //if (msg.ctx != null) {
-//                    msg.ctx.add(msg.index, msg.resp);
-//                    if (msg.ctx.response.isComplete() && !msg.ctx.finished && (msg.ctx.interger.getAndIncrement() == 0)) {
-//                        msg.ctx.finished = true;
-//                        msg.ctx.request.reply = new TOMMessage(id, msg.ctx.request.getSession(),
-//                                msg.ctx.request.getSequence(), msg.ctx.response.serialize(), SVController.getCurrentViewId());
-//
-//                        replier.manageReply(msg.ctx.request, null);
-//                    }
-//                    //}
-//                    statistics.computeStatistics(thread_id, 1);
-//                    //remove
-//                    subgraphs[this.myPartition].remove(node);
-//                } catch (InterruptedException ex) {
-//                    ex.printStackTrace();
-//                }
-//            }
+                    //MultiOperationCtx ctx = ctxs.get(msg.request.toString());
+                    //if (msg.ctx != null) {
+                    msg.ctx.add(msg.index, msg.resp);
+                    if (msg.ctx.response.isComplete() && !msg.ctx.finished && (msg.ctx.interger.getAndIncrement() == 0)) {
+                        msg.ctx.finished = true;
+                        msg.ctx.request.reply = new TOMMessage(id, msg.ctx.request.getSession(),
+                                msg.ctx.request.getSequence(), msg.ctx.response.serialize(), SVController.getCurrentViewId());
+                        
+                        replier.manageReply(msg.ctx.request, null);
+                    }
+                    //}
+                    statistics.computeStatistics(thread_id, 1);
+                    //remove
+                    subgraphs[this.myPartition].remove(node);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
     }
