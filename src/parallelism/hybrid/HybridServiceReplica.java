@@ -56,7 +56,6 @@ public class HybridServiceReplica extends ParallelServiceReplica {
     protected void createScheduler(int initialWorkers) {
         if (initialWorkers <= 0) {
             initialWorkers = 1;
-
         }
 
         this.scheduler = new HybridScheduler(initialWorkers,
@@ -65,7 +64,6 @@ public class HybridServiceReplica extends ParallelServiceReplica {
 
     @Override
     protected void initWorkers(int n, int id) {
-
         System.out.println("n early: " + n);
         int tid = 0;
         for (int i = 0; i < n; i++) {
@@ -76,18 +74,15 @@ public class HybridServiceReplica extends ParallelServiceReplica {
     }
 
     protected void initLateWorkers(int n, int id, int partitions) {
-
         System.out.println("n late: " + n);
         int tid = 0;
         for (int i = 0; i < n; i++) {
-
             new LateWorker(tid, partitions).start();
             tid++;
         }
     }
 
     private class EarlyWorker extends Thread {
-
         private int thread_id;
         private Queue<TOMMessage> reqs = null;
 
@@ -130,7 +125,6 @@ public class HybridServiceReplica extends ParallelServiceReplica {
     }
 
     private class LateWorker extends Thread {
-
         private int thread_id;
         private int myPartition = 0;
 
@@ -188,6 +182,5 @@ public class HybridServiceReplica extends ParallelServiceReplica {
                 }
             }
         }
-
     }
 }

@@ -65,7 +65,6 @@ public class ParallelServiceReplica extends ServiceReplica {
         createScheduler(initialWorkers);
 
         initWorkers(this.scheduler.getNumWorkers(), id);
-
     }
 
     public ParallelServiceReplica(int id, Executable executor, Recoverable recoverer, Scheduler s) {
@@ -219,7 +218,6 @@ public class ParallelServiceReplica extends ServiceReplica {
                         }*/
 
                     } else if (request.getReqType() == TOMMessageType.RECONFIG) {
-
                         SVController.enqueueUpdate(request);
                     } else {
                         throw new RuntimeException("Should never reach here! ");
@@ -230,7 +228,6 @@ public class ParallelServiceReplica extends ServiceReplica {
                     // him (but only if it came from consensus an not state transfer)
                     tomLayer.getCommunication().send(new int[]{request.getSender()}, new TOMMessage(SVController.getStaticConf().getProcessId(),
                             request.getSession(), request.getSequence(), TOMUtil.getBytes(SVController.getCurrentView()), SVController.getCurrentViewId()));
-
                 }
                 //requestCount++;
             }
@@ -281,10 +278,9 @@ public class ParallelServiceReplica extends ServiceReplica {
 
             consensusCount++;
         }
+
         if (SVController.hasUpdates()) {
-
             this.scheduler.scheduleReplicaReconfiguration();
-
         }
     }
 
@@ -366,7 +362,6 @@ public class ParallelServiceReplica extends ServiceReplica {
         }
 
         private void execute(TOMMessage request) {
-
             MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
             MultiOperationCtx ctx = new MultiOperationCtx(reqs.id1.length, request);
             for (int i = 0; i < reqs.id1.length; i++) {

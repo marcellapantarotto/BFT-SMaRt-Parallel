@@ -11,6 +11,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import parallelism.MessageContextPair;
 import parallelism.ParallelMapping;
+import parallelism.MultiOperationCtx;
 import parallelism.late.ConflictDefinition;
 import parallelism.scheduler.Scheduler;
 
@@ -21,7 +22,6 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 import static com.codahale.metrics.MetricRegistry.name;
-import parallelism.MultiOperationCtx;
 
 final class PooledScheduler implements Scheduler {
 
@@ -128,7 +128,7 @@ final class PooledScheduler implements Scheduler {
                 count = 0;
             }
         }
-
+        
     }
 
     public void schedule(TOMMessage request) {
@@ -183,7 +183,6 @@ final class PooledScheduler implements Scheduler {
     }
 
     private void execute(Task task) {
-
         executor.accept(task.request);
         space.release();
         stats.ready.dec();

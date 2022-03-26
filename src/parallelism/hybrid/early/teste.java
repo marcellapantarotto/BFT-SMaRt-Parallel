@@ -26,12 +26,11 @@ public class teste {
 
         // ClassToThreads[] CtoT = new EarlySchedulerMapping().generateEarly(3, 2);
         HybridClassToThreads[] CtoT = new EarlySchedulerMapping().generateMappings(3);
-       // ClassToThreads[] CtoT = generate(3, 2);
+        // ClassToThreads[] CtoT = generate(3, 2);
         for (int i = 0; i < CtoT.length; i++) {
             System.out.println(CtoT[i]);
 
         }/*
-
         
         int[] p = new int[3];
         p[0]=0;
@@ -41,7 +40,7 @@ public class teste {
         System.out.println(getClassIdEarly("R", p));
         System.out.println(getClassIdEarly("W", p));*/
     }
-    
+
     public static int getClassIdEarly(String rORw, int... partitions) {
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < partitions.length; j++) {
@@ -50,7 +49,7 @@ public class teste {
         }
         sb.append(rORw);
         //System.out.print("getClassId "+sb.toString().hashCode());
-        
+
         return sb.toString().hashCode();
     }
 
@@ -113,7 +112,6 @@ public class teste {
             String t = "Partition " + i + " : ";
             for (int j = 0; j < threadsPerPartition; j++) {
                 t = t + " , " + threads[i][j];
-
             }
             System.out.println(t);
         }
@@ -124,11 +122,10 @@ public class teste {
             if (ar.toArray().length > 2 && ar.toArray().length < numPartitions) {
                 it.remove();
             }
-
         }
         System.out.println(allCombList);
 
-        CtoT = new ClassToThreads[allCombList.size()*2];
+        CtoT = new ClassToThreads[allCombList.size() * 2];
         int posC = 0;
         for (int i = 0; i < allCombList.size(); i++) {
             Object[] ar = ((TreeSet) allCombList.get(i)).toArray();
@@ -200,6 +197,5 @@ public class teste {
 
         }
         return CtoT;
-
     }
 }

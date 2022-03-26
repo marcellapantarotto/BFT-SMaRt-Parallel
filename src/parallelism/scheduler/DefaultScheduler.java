@@ -55,6 +55,7 @@ public class DefaultScheduler implements Scheduler {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }*/
+        
         Queue[] q = this.getMapping().getAllQueues();
         for (Queue q1 : q) {
             boolean inserted = false;
@@ -106,7 +107,6 @@ public class DefaultScheduler implements Scheduler {
                 }
             }
         }
-
     }
 
     @Override
@@ -118,7 +118,6 @@ public class DefaultScheduler implements Scheduler {
             //TRATAR COMO CONFLICT ALL
             //criar uma classe que sincroniza tudo
             System.err.println("CLASStoTHREADs MAPPING NOT FOUND");
-
         }
 
         if (ct.type == ClassToThreads.CONC) {//conc

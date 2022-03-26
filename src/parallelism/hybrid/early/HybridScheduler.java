@@ -63,7 +63,7 @@ public class HybridScheduler implements Scheduler {
     public void schedule(TOMMessage request) {
         HybridClassToThreads ct = this.getClass(request.groupId);
         if (ct == null) {
-            System.err.println("CLASStoTHREADs MAPPING NOT FOUND: "+request.groupId);
+            System.err.println("CLASStoTHREADs MAPPING NOT FOUND: " + request.groupId);
         } else if (ct.type == HybridClassToThreads.CONC) {//conc (só tem uma thread, então vai ser sempre na posição 0)
             boolean inserted = false;
             while (!inserted) {

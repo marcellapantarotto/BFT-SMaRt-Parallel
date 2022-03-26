@@ -124,6 +124,5 @@ public class LateServiceReplica extends ParallelServiceReplica {
                 s.remove(node);
             }
         }
-
     }
 }

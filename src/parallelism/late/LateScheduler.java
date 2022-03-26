@@ -57,6 +57,7 @@ public class LateScheduler implements Scheduler {
         }
         return this.conflictDef.isDependent(thisRequest, otherRequest);
     }*/
+    
     @Override
     public int getNumWorkers() {
         return this.numWorkers;
@@ -78,11 +79,9 @@ public class LateScheduler implements Scheduler {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-
     }
 
     public Object get() {
-
         try {
             return cos.get();
         } catch (InterruptedException ex) {
@@ -110,5 +109,4 @@ public class LateScheduler implements Scheduler {
     public ParallelMapping getMapping() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

@@ -78,7 +78,6 @@ public class SequentialServiceReplica extends ServiceReplica {
     }
 
     private void execute(TOMMessage request) {
-
         MultiOperationRequest reqs = new MultiOperationRequest(request.getContent());
         MultiOperationCtx ctx = new MultiOperationCtx(reqs.id1.length, request);
         for (int i = 0; i < reqs.id1.length; i++) {
@@ -176,7 +175,6 @@ public class SequentialServiceReplica extends ServiceReplica {
                         //bftsmart.tom.util.Logger.println("(ParallelServiceReplica.receiveMessages) sending reply to "+ msg.message.getSender());
                         replier.manageReply(ctx.request, null);*/
                     } else if (request.getReqType() == TOMMessageType.RECONFIG) {
-
                         SVController.enqueueUpdate(request);
                     } else {
                         throw new RuntimeException("Should never reach here! ");

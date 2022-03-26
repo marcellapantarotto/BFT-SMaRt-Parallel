@@ -35,10 +35,8 @@ public class LocalExecutionPooled {
     protected int pw = 0;
 
     private ListServerMP server;
-    
 
-    
-     public static void main(String[] args) {
+    public static void main(String[] args) {
         int entries = Integer.parseInt(args[0]);//entries
         int lt = Integer.parseInt(args[1]);//workers
         int np = Integer.parseInt(args[2]); //partições
@@ -51,7 +49,7 @@ public class LocalExecutionPooled {
         
         PooledScheduler.normal = n;
         
-         new LocalExecutionPooled(entries,lt,np,pG,pW,numReq);
+        new LocalExecutionPooled(entries,lt,np,pG,pW,numReq);
      }
     
     public LocalExecutionPooled(int entries, int lateThreads, int numberPartitions, int pG, int pW, int numReqs) {
@@ -392,7 +390,7 @@ public class LocalExecutionPooled {
         }
 
         public TOMMessage containsP1(Object[] e) {
-            return containsFinal(e, 0, MultipartitionMapping.R1);
+            return containsFinal(e, 0, MultipartitionMapping.R1); // R1 = identificador
         }
 
         public TOMMessage containsP2(Object[] e) {

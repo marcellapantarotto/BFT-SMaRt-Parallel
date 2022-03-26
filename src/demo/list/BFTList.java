@@ -76,7 +76,6 @@ public class BFTList<V> implements List<V> {
             byte[] rep = null;
             if (parallel) {
                 rep = proxy.invokeParallel(out.toByteArray(), ParallelMapping.SYNC_ALL);
-
             } else {
                 rep = proxy.invokeOrdered(out.toByteArray());
             }
@@ -106,7 +105,6 @@ public class BFTList<V> implements List<V> {
             byte[] rep = null;
             if (parallel) {
                 rep = proxy.invokeParallel(out.toByteArray(), ParallelMapping.CONC_ALL);
-
             } else {
                 rep = proxy.invokeOrdered(out.toByteArray());
             }
@@ -135,7 +133,6 @@ public class BFTList<V> implements List<V> {
             byte[] rep = null;
             if (parallel) {
                 rep = proxy.invokeParallel(out.toByteArray(), ParallelMapping.SYNC_ALL);
-
             } else {
                 rep = proxy.invokeOrdered(out.toByteArray());
             }
@@ -161,7 +158,6 @@ public class BFTList<V> implements List<V> {
             byte[] rep = null;
             if (parallel) {
                 rep = proxy.invokeParallel(out.toByteArray(), ParallelMapping.CONC_ALL);
-
             } else {
                 rep = proxy.invokeOrdered(out.toByteArray());
             }
